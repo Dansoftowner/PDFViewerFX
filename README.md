@@ -45,4 +45,8 @@ PDFDisplayer(File); //reads the data from the File
 PDFDisplayer(InputStream) //reads the data from the InputStream 
 ```
 
-##Screenshots
+## Screenshots
+
+![alt text](screenshots/1.jpg)
+![alt text](screenshots/2.jpg)
+![alt text](screenshots/3.jpg)
