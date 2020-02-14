@@ -1,7 +1,11 @@
 import com.dansoftware.pdfdisplayer.PDFDisplayer;
+import com.dansoftware.pdfdisplayer.ProcessListener;
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
@@ -15,10 +19,50 @@ public class Demo extends Application {
     public void start(Stage primaryStage) throws Exception {
         PDFDisplayer displayer = new PDFDisplayer();
 
-        primaryStage.setScene(new Scene(displayer.toNode()));
+        Stage alertStage = new Stage();
+        alertStage.setScene(new Scene(new StackPane(new Label("Processing"))));
+        alertStage.setAlwaysOnTop(true);
+        alertStage.show();
+        ProcessListener prl = (finished) -> {
+            Platform.runLater(() -> {
+                if (finished)
+                    alertStage.close();
+                else if (!alertStage.isShowing())
+                    alertStage.show();
+            });
+
+        };
+
+        displayer.setProcessListener(prl);
+
+        Button btn = new Button("Load");
+        btn.setOnAction(e -> {
+            Thread t = new Thread(() ->
+            {
+                try {
+                    displayer.displayPdf(new URL("https://www.tutorialspoint.com/jdbc/jdbc_tutorial.pdf"));
+
+                } catch (IOException ex) {
+                    ex.printStackTrace();
+                }
+            }
+            );
+            t.start();
+        });
+
+        primaryStage.setScene(new Scene(new VBox(btn, displayer.toNode())));
         primaryStage.show();
 
-        displayer.displayPdf(new URL("https://www.tutorialspoint.com/jdbc/jdbc_tutorial.pdf"));
+        Thread t = new Thread(() ->
+        {
+            try {
+                displayer.displayPdf(new URL("https://www.tutorialspoint.com/jdbc/jdbc_tutorial.pdf"));
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        );
+        t.start();
     }
 
     public static void main(String[] args) {

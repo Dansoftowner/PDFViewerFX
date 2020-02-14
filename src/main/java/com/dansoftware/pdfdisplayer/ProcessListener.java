@@ -2,5 +2,5 @@ package com.dansoftware.pdfdisplayer;
 
 @FunctionalInterface
 public interface ProcessListener {
-    void listen(int actualProcessed, boolean finished);
+    void listen(boolean finished);
 }

@@ -1,5 +1,6 @@
 package com.dansoftware.pdfdisplayer;
 
+import javafx.application.Platform;
 import javafx.concurrent.Worker;
 import javafx.scene.Parent;
 import javafx.scene.web.WebEngine;
@@ -13,12 +14,15 @@ import java.util.Base64;
 
 public class PDFDisplayer {
 
+    private boolean pdfJsLoaded;
+
+    private ProcessListener processListener;
 
     private WebView nodeValue;
     private String toExecuteWhenPDFJSLoaded = "";
 
 
-    public PDFDisplayer(){
+    public PDFDisplayer() {
     }
 
     public PDFDisplayer(File file) throws IOException {
@@ -43,46 +47,66 @@ public class PDFDisplayer {
     }
 
     public void displayPdf(InputStream inputStream) throws IOException {
+
+        if (inputStream == null)
+            return;
+
         try (ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
+
+            updateProcessListener(false);
 
             byte[] buffer = new byte[4096];
 
             int actualByteCount;
-            while ((actualByteCount = inputStream.read(buffer)) != -1) {
+            while (true) {
+                try {
+                    if ((actualByteCount = inputStream.read(buffer)) == -1) break;
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
                 outputStream.write(buffer, 0, actualByteCount);
             }
+
+            updateProcessListener(true);
 
             byte[] data = outputStream.toByteArray();
             String base64 = Base64.getEncoder().encodeToString(data);
             // call JS function from Java code
             String js = "openFileFromBase64('" + base64 + "');";
 
-            try {
-                nodeValue.getEngine().executeScript(js);
-            } catch (Exception ex){
-                toExecuteWhenPDFJSLoaded += js;
-            }
+            Platform.runLater(() -> {
+                try {
+                    nodeValue.getEngine().executeScript(js);
+                } catch (Exception ex) {
+                    if (!pdfJsLoaded) toExecuteWhenPDFJSLoaded += js;
+                }
+            });
 
         } finally {
-             if(inputStream != null) inputStream.close();
+            inputStream.close();
         }
 
-        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-        byteArrayOutputStream.write(10);
-        byte[] arr = byteArrayOutputStream.toByteArray();
     }
 
 
-    public void navigateByPage(int pageNum){
+    public void navigateByPage(int pageNum) {
         String jsCommand = "goToPage(" + pageNum + ");";
         try {
             nodeValue.getEngine().executeScript(jsCommand);
-        } catch (Exception ex){
-            toExecuteWhenPDFJSLoaded += jsCommand;
+        } catch (Exception ex) {
+            if (!pdfJsLoaded) toExecuteWhenPDFJSLoaded += jsCommand;
         }
     }
 
-    private WebView createWebView(){
+    public void setProcessListener(ProcessListener listener) {
+        this.processListener = listener;
+    }
+
+    private void updateProcessListener(boolean val) {
+        if (processListener != null && pdfJsLoaded) processListener.listen(val);
+    }
+
+    private WebView createWebView() {
         WebView webView = new WebView();
         WebEngine engine = webView.getEngine();
         String url = getClass().getResource("/pdfjs/web/viewer.html").toExternalForm();
@@ -90,19 +114,22 @@ public class PDFDisplayer {
         engine.setJavaScriptEnabled(true);
         engine.load(url);
 
-
+        if (processListener != null) processListener.listen(false);
         engine.getLoadWorker()
                 .stateProperty()
                 .addListener((observable, oldValue, newValue) -> {
                     JSObject window = (JSObject) engine.executeScript("window");
                     window.setMember("java", new JSLogListener());
-                    engine.executeScript("console.log = function(message){ java.log(message); };");
+                    engine.executeScript("console.log = function(message){ try {java.log(message);} catch(e) {} };");
 
                     if (newValue == Worker.State.SUCCEEDED) {
                         try {
+                            if (processListener != null) processListener.listen(pdfJsLoaded = true);
+
                             engine.executeScript(toExecuteWhenPDFJSLoaded);
+                            toExecuteWhenPDFJSLoaded = null;
                         } catch (Exception e) {
-                            e.printStackTrace();
+                            throw new RuntimeException(e);
                         }
                     }
                 });
@@ -111,9 +138,15 @@ public class PDFDisplayer {
 
     }
 
+    public void executeScript(String js) {
+        try {
+            this.nodeValue.getEngine().executeScript(js);
+        } catch (Exception ex) {
+            toExecuteWhenPDFJSLoaded += String.format("%s;", js);
+        }
+    }
 
-
-    public Parent toNode(){
+    public Parent toNode() {
         if (nodeValue == null)
             return nodeValue = createWebView();
         else

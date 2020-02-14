@@ -6,8 +6,12 @@ import java.io.OutputStream;
 public class JSLogListener {
     private static OutputStream out = System.out;
 
+    JSLogListener(){
+    }
+
     public void log(String message) throws IOException {
-        out.write((message + "\n").getBytes());
+        if (message != null && out != null)
+           out.write((message + "\n").getBytes());
     }
 
     public static void setOutputStream(OutputStream outputStream){

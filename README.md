@@ -3,6 +3,9 @@
 This library is actually a javaFX wrapper for Mozilla's [PDF.js](https://github.com/mozilla/pdf.js/) javascript library, but with this library you don't have to
 deal with any javascript code, so you can just use a java object to display pdf documents in javaFX. 
 
+##How to get it?
+You can download the jar file from the releases tab.
+
 ## Usage
 
 First, you have to import the neccessary class:
@@ -45,8 +48,13 @@ PDFDisplayer(File); //reads the data from the File
 PDFDisplayer(InputStream) //reads the data from the InputStream 
 ```
 
+##More operations, tutorials
+If you want to deal with some other useful functions from this library, just go to the wiki page! 
+
 ## Screenshots
 
 ![alt text](screenshots/1.jpg)
+
 ![alt text](screenshots/2.jpg)
+
 ![alt text](screenshots/3.jpg)
