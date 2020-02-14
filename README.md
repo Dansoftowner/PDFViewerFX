@@ -3,7 +3,7 @@
 This library is actually a javaFX wrapper for Mozilla's [PDF.js](https://github.com/mozilla/pdf.js/) javascript library, but with this library you don't have to
 deal with any javascript code, so you can just use a java object to display pdf documents in javaFX. 
 
-## Examples
+## Usage
 
 First, you have to import the neccessary class:
 ```java
@@ -44,3 +44,5 @@ PDFDisplayer(URL); //reads the data from the URL
 PDFDisplayer(File); //reads the data from the File
 PDFDisplayer(InputStream) //reads the data from the InputStream 
 ```
+
+##Screenshots

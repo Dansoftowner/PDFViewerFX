@@ -13,7 +13,6 @@ import java.util.Locale;
 public class Demo extends Application {
     @Override
     public void start(Stage primaryStage) throws Exception {
-        Locale.setDefault(Locale.US);
         PDFDisplayer displayer = new PDFDisplayer();
 
         primaryStage.setScene(new Scene(displayer.toNode()));
