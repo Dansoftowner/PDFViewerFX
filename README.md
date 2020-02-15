@@ -49,7 +49,7 @@ PDFDisplayer(InputStream) //reads the data from the InputStream
 ```
 
 ## More operations, tutorials
-If you want to deal with some other useful functions from this library, just go to the wiki page! 
+If you want to deal with some other useful functions from this library, just go to the [wiki](https://github.com/Dansoftowner/PDFViewerFX/wiki) page! 
 
 ## Screenshots
 
