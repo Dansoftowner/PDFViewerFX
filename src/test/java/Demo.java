@@ -1,3 +1,4 @@
+import com.dansoftware.pdfdisplayer.JSLogListener;
 import com.dansoftware.pdfdisplayer.PDFDisplayer;
 import com.dansoftware.pdfdisplayer.ProcessListener;
 import javafx.application.Application;
@@ -60,6 +61,8 @@ public class Demo extends Application {
 
         displayer.setSecondaryToolbarToggleVisibility(true);
         displayer.getStylesSheets().add("style.css");
+
+        displayer.executeScript("document.getElementById('secondaryToolbarToggle').style.backgroundColor = 'blue';");
     }
 
     public static void main(String[] args) {

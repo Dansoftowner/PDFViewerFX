@@ -150,7 +150,6 @@ public class PDFDisplayer {
                             if (processListener != null) processListener.listen(pdfJsLoaded = true);
 
                             engine.executeScript(toExecuteWhenPDFJSLoaded);
-                            engine.executeScript("document.getElementById('secondaryToolbarToggle').style.backgroundColor = 'inherit';");
                             toExecuteWhenPDFJSLoaded = null;
                         } catch (Exception e) {
                             throw new RuntimeException(e);
