@@ -1,5 +1,5 @@
 # PDFViewerFX
-#### A library for displaying pdf documents inside your javaFX application
+#### A library for displaying/viewing pdf documents inside your javaFX application
 This library is actually a javaFX wrapper for Mozilla's [PDF.js](https://github.com/mozilla/pdf.js/) javascript library, but with this library you don't have to
 deal with any javascript code, so you can just use a java object to view pdf documents in javaFX. 
 
