@@ -1,6 +1,7 @@
 package com.dansoftware.pdfdisplayer;
 
 import javafx.application.Platform;
+import javafx.collections.ObservableList;
 import javafx.concurrent.Worker;
 import javafx.scene.Parent;
 import javafx.scene.web.WebEngine;
@@ -88,6 +89,28 @@ public class PDFDisplayer {
 
     }
 
+    @SuppressWarnings("all")
+    public void setSecondaryToolbarToggleVisibility(boolean value) {
+        String css;
+        if (value){
+            css = new StringBuilder()
+                    .append("document.getElementById('secondaryToolbarToggle').style.display = 'inherit';")
+                    .append("document.getElementById('secondaryToolbarToggle').style.visibility = 'inherit';")
+                    .toString();
+        } else {
+            css = new StringBuilder()
+                    .append("document.getElementById('secondaryToolbarToggle').style.display = 'none';")
+                    .append("document.getElementById('secondaryToolbarToggle').style.visibility = 'hidden';")
+                    .toString();
+        }
+
+        try {
+            nodeValue.getEngine().executeScript(css);
+        } catch (Exception ex){
+            if (!pdfJsLoaded) this.toExecuteWhenPDFJSLoaded += css;
+        }
+
+    }
 
     public void navigateByPage(int pageNum) {
         String jsCommand = "goToPage(" + pageNum + ");";
@@ -127,6 +150,7 @@ public class PDFDisplayer {
                             if (processListener != null) processListener.listen(pdfJsLoaded = true);
 
                             engine.executeScript(toExecuteWhenPDFJSLoaded);
+                            engine.executeScript("document.getElementById('secondaryToolbarToggle').style.backgroundColor = 'inherit';");
                             toExecuteWhenPDFJSLoaded = null;
                         } catch (Exception e) {
                             throw new RuntimeException(e);
@@ -138,11 +162,15 @@ public class PDFDisplayer {
 
     }
 
+    public ObservableList<String> getStylesSheets(){
+        return nodeValue.getStylesheets();
+    }
+
     public void executeScript(String js) {
         try {
             this.nodeValue.getEngine().executeScript(js);
         } catch (Exception ex) {
-            toExecuteWhenPDFJSLoaded += String.format("%s;", js);
+            if (!pdfJsLoaded) toExecuteWhenPDFJSLoaded += String.format("%s;", js);
         }
     }
 

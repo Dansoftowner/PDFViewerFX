@@ -3,9 +3,12 @@ plugins {
 }
 
 group 'FXPDFViewer'
-version '1.0-SNAPSHOT'
+version '0.3'
 
 sourceCompatibility = 1.8
+
+jar {
+}
 
 repositories {
     mavenCentral()

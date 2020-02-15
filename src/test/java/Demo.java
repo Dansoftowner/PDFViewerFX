@@ -37,32 +37,29 @@ public class Demo extends Application {
 
         Button btn = new Button("Load");
         btn.setOnAction(e -> {
-            Thread t = new Thread(() ->
-            {
+            new Thread(() -> {
                 try {
                     displayer.displayPdf(new URL("https://www.tutorialspoint.com/jdbc/jdbc_tutorial.pdf"));
 
                 } catch (IOException ex) {
                     ex.printStackTrace();
                 }
-            }
-            );
-            t.start();
+            }).start();
         });
 
         primaryStage.setScene(new Scene(new VBox(btn, displayer.toNode())));
         primaryStage.show();
 
-        Thread t = new Thread(() ->
-        {
+        new Thread(() -> {
             try {
                 displayer.displayPdf(new URL("https://www.tutorialspoint.com/jdbc/jdbc_tutorial.pdf"));
             } catch (IOException e) {
                 e.printStackTrace();
             }
-        }
-        );
-        t.start();
+        }).start();
+
+        displayer.setSecondaryToolbarToggleVisibility(true);
+        displayer.getStylesSheets().add("style.css");
     }
 
     public static void main(String[] args) {

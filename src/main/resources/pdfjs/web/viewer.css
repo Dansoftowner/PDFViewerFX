@@ -2457,6 +2457,8 @@ html[dir='rtl'] #documentPropertiesOverlay .row > * {
   }
 }
 
-#toolbarViewerRight {
-    display:none;
+/*By dansoftware*/
+#presentationMode, #openFile, #print, #download, #viewBookmark {
+ display: none;
+ visibility: hidden;
 }
