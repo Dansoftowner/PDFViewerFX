@@ -63,6 +63,8 @@ public class Demo extends Application {
         displayer.getStylesSheets().add("style.css");
 
         displayer.executeScript("document.getElementById('secondaryToolbarToggle').style.backgroundColor = 'blue';");
+
+        ///JSLogListener.setOutputStream(System.err);
     }
 
     public static void main(String[] args) {
