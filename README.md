@@ -4,7 +4,7 @@ This library is actually a javaFX wrapper for Mozilla's [PDF.js](https://github.
 deal with any javascript code, so you can just use a java object to display pdf documents in javaFX. 
 
 ## How to get it?
-You can download the jar file from the releases tab.
+You can download the jar file from the [releases](https://github.com/Dansoftowner/PDFViewerFX/releases) tab.
 
 ## Usage
 
