@@ -60,7 +60,7 @@ public class Demo extends Application {
         }).start();
 
         displayer.setSecondaryToolbarToggleVisibility(true);
-        displayer.getStylesSheets().add("style.css");
+        displayer.toNode().getStylesheets().add("style.css");
 
         displayer.executeScript("document.getElementById('secondaryToolbarToggle').style.backgroundColor = 'blue';");
 
