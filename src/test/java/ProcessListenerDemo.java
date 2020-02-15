@@ -15,7 +15,6 @@ import java.net.URL;
 public class ProcessListenerDemo extends Application {
     @Override
     public void start(Stage primaryStage) throws Exception {
-
         //create a progressBar
         ProgressBar progressBar = new ProgressBar();
         progressBar.setPrefWidth(500);

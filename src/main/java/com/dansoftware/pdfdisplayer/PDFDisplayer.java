@@ -92,6 +92,7 @@ public class PDFDisplayer {
     }
 
 
+    @SuppressWarnings("all")
     public void setSecondaryToolbarToggleVisibility(boolean value) {
         setVisibilityOf("secondaryToolbarToggle", value);
 
@@ -136,6 +137,22 @@ public class PDFDisplayer {
             nodeValue.getEngine().executeScript(css);
         } catch (Exception ex) {
             if (!pdfJsLoaded) this.toExecuteWhenPDFJSLoaded += css;
+        }
+    }
+
+    public int getActualPageNumber(){
+        try {
+            return (int) nodeValue.getEngine().executeScript("PDFViewerApplication.page;");
+        } catch (Exception e) {
+            return 0;
+        }
+    }
+
+    public int getTotalPageCount(){
+        try {
+            return (int) nodeValue.getEngine().executeScript("PDFViewerApplication.pagesCount;");
+        } catch (Exception e) {
+            return 0;
         }
     }
 
