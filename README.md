@@ -8,7 +8,7 @@ You can download the jar file from the [releases](https://github.com/Dansoftowne
 
 ## Usage
 
-First, you have to import the neccessary class:
+First, you have to import the necessary class:
 ```java
 import com.dansoftware.pdfdisplayer.PDFDisplayer;
 ```
