@@ -19,7 +19,7 @@ Releases are also available through [JitPack](https://jitpack.io/#Dansoftowner/P
 
 ## Usage
 
-First, you have to import the neccessary class:
+First, you have to import the necessary class:
 ```java
 import com.dansoftware.pdfdisplayer.PDFDisplayer;
 ```
