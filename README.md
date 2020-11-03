@@ -6,6 +6,17 @@ deal with any javascript code, so you can just use a java object to view pdf doc
 ## How to get it?
 You can download the jar file from the [releases](https://github.com/Dansoftowner/PDFViewerFX/releases) tab.
 
+### Maven
+
+Releases are also available through [JitPack](https://jitpack.io/#Dansoftowner/PDFViewerFX):
+```xml
+<dependency>
+    <groupId>com.github.Dansoftowner</groupId>
+    <artifactId>PDFViewerFX</artifactId>
+    <version>0.5</version>
+</dependency>
+```  
+
 ## Usage
 
 First, you have to import the neccessary class:
