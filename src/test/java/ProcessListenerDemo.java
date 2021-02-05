@@ -2,9 +2,12 @@ import com.dansoftware.pdfdisplayer.PDFDisplayer;
 import javafx.animation.Timeline;
 import javafx.application.Application;
 import javafx.application.Platform;
+import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.ProgressBar;
+import javafx.scene.control.ProgressIndicator;
+import javafx.scene.layout.Priority;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
@@ -23,17 +26,13 @@ public class ProcessListenerDemo extends Application {
         //create a pdfDisplayer
         PDFDisplayer pdfDisplayer = new PDFDisplayer();
         //set the process listener of it
-        pdfDisplayer.setProcessListener(finished ->
-            Platform.runLater(() -> {
-                if (finished) {
-                    //when the process finished
-                    progressBar.setProgress(0);
-                } else {
-                    //when the process started
-                    progressBar.setProgress(Timeline.INDEFINITE);
-                }
-            })
-        );
+
+        pdfDisplayer.setOnLoaderTaskPresent(task -> {
+            task.setOnRunning((e) -> progressBar.setProgress(ProgressIndicator.INDETERMINATE_PROGRESS));
+            task.setOnSucceeded((e) -> progressBar.setProgress(0));
+            task.setOnFailed((e) -> progressBar.setProgress(0));
+            //OR using task.progressProperty()
+        });
 
         //create a btn for loading the pdf
         Button loaderBtn = new Button("Load");
@@ -41,14 +40,16 @@ public class ProcessListenerDemo extends Application {
             //start a new thread for load the pdf document
             new Thread(() -> {
                 try {
-                    pdfDisplayer.displayPdf(new URL("https://www.tutorialspoint.com/javafx/javafx_tutorial.pdf"));
+                    pdfDisplayer.loadPDF(new URL("https://www.tutorialspoint.com/javafx/javafx_tutorial.pdf"));
                 } catch (IOException ex) {
                     ex.printStackTrace();
                 }
             }).start()
         );
 
-        primaryStage.setScene(new Scene(new VBox(new StackPane(loaderBtn), pdfDisplayer.toNode(), new StackPane(progressBar))));
+        final Parent pdfNode = pdfDisplayer.toNode();
+        VBox.setVgrow(pdfNode, Priority.ALWAYS);
+        primaryStage.setScene(new Scene(new VBox(new StackPane(loaderBtn), pdfNode, new StackPane(progressBar))));
         primaryStage.show();
     }
 

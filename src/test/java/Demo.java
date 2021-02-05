@@ -1,6 +1,4 @@
-import com.dansoftware.pdfdisplayer.JSLogListener;
 import com.dansoftware.pdfdisplayer.PDFDisplayer;
-import com.dansoftware.pdfdisplayer.ProcessListener;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.scene.Scene;
@@ -10,10 +8,8 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
-import java.io.File;
 import java.io.IOException;
 import java.net.URL;
-import java.util.Locale;
 
 public class Demo extends Application {
     @Override
@@ -24,40 +20,20 @@ public class Demo extends Application {
         alertStage.setScene(new Scene(new StackPane(new Label("Processing"))));
         alertStage.setAlwaysOnTop(true);
         alertStage.show();
-        ProcessListener prl = (finished) -> {
-            Platform.runLater(() -> {
-                if (finished)
-                    alertStage.close();
-                else if (!alertStage.isShowing())
-                    alertStage.show();
-            });
 
-        };
-
-        displayer.setProcessListener(prl);
+        displayer.setOnLoaderTaskPresent(task -> {
+            task.setOnRunning(e -> alertStage.show());
+            task.setOnSucceeded(e -> alertStage.close());
+            task.setOnFailed(e -> alertStage.close());
+        });
 
         Button btn = new Button("Load");
-        btn.setOnAction(e -> {
-            new Thread(() -> {
-                try {
-                    displayer.displayPdf(new URL("https://www.tutorialspoint.com/jdbc/jdbc_tutorial.pdf"));
-
-                } catch (IOException ex) {
-                    ex.printStackTrace();
-                }
-            }).start();
-        });
+        btn.setOnAction(e -> loadPDF(displayer));
 
         primaryStage.setScene(new Scene(new VBox(btn, displayer.toNode())));
         primaryStage.show();
 
-        new Thread(() -> {
-            try {
-                displayer.displayPdf(new URL("https://www.tutorialspoint.com/jdbc/jdbc_tutorial.pdf"));
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }).start();
+        loadPDF(displayer);
 
         displayer.setSecondaryToolbarToggleVisibility(true);
         displayer.toNode().getStylesheets().add("style.css");
@@ -65,6 +41,14 @@ public class Demo extends Application {
         displayer.executeScript("document.getElementById('secondaryToolbarToggle').style.backgroundColor = 'blue';");
 
         ///JSLogListener.setOutputStream(System.err);
+    }
+
+    private void loadPDF(PDFDisplayer pdfDisplayer) {
+        try {
+            pdfDisplayer.loadPDF(new URL("https://www.tutorialspoint.com/jdbc/jdbc_tutorial.pdf"));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     public static void main(String[] args) {
