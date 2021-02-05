@@ -11,6 +11,8 @@ import javafx.scene.Parent;
 import javafx.scene.web.WebEngine;
 import javafx.scene.web.WebView;
 import netscape.javascript.JSObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.*;
 import java.net.URL;
@@ -20,6 +22,8 @@ import java.util.concurrent.Executors;
 import java.util.function.Consumer;
 
 public class PDFDisplayer {
+
+    private static final Logger logger = LoggerFactory.getLogger(PDFDisplayer.class);
 
     private static final ExecutorService THREAD_POOL = Executors.newCachedThreadPool(runnable -> {
         Thread t = new Thread(runnable);
@@ -223,7 +227,6 @@ public class PDFDisplayer {
     private WebView createWebView() {
         WebView webView = new WebView();
         webView.setContextMenuEnabled(false);
-        webView.getStylesheets().add("/com/dansoftware/pdfdisplayer/base.css");
 
         WebEngine engine = webView.getEngine();
         String url = getClass().getResource("/pdfjs/web/viewer.html").toExternalForm();
@@ -246,8 +249,10 @@ public class PDFDisplayer {
                                     try {
                                        pdfJsLoaded = true;
 
-                                        if (loadScript != null)
+                                        if (loadScript != null) {
+                                            logger.debug("PDF already loaded");
                                             engine.executeScript(loadScript);
+                                        }
 
                                         engine.executeScript(toExecuteWhenPDFJSLoaded);
                                         toExecuteWhenPDFJSLoaded = null;
