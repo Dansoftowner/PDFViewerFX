@@ -4,18 +4,42 @@ This library is actually a javaFX wrapper for Mozilla's [PDF.js](https://github.
 deal with any javascript code, so you can just use a java object to view pdf documents in javaFX. 
 
 ## How to get it?
-You can download the jar file from the [releases](https://github.com/Dansoftowner/PDFViewerFX/releases) tab.
+
+Releases are available through [JitPack](https://jitpack.io/#Dansoftowner/PDFViewerFX):
 
 ### Maven
 
-Releases are also available through [JitPack](https://jitpack.io/#Dansoftowner/PDFViewerFX):
+```xml
+<repositories>
+    <repository>
+        <id>jitpack.io</id>
+        <url>https://jitpack.io</url>
+    </repository>
+</repositories>
+```
+
 ```xml
 <dependency>
     <groupId>com.github.Dansoftowner</groupId>
     <artifactId>PDFViewerFX</artifactId>
-    <version>0.5</version>
+    <version>0.7</version>
 </dependency>
 ```  
+
+### Gradle
+
+```groovy
+repositories {
+    ...
+    maven { url 'https://jitpack.io' }
+}
+```
+
+```groovy
+dependencies {
+    implementation 'com.github.Dansoftowner:PDFViewerFX:0.7'
+}
+```
 
 ## Usage
 
@@ -34,7 +58,7 @@ primaryStage.show();
  * This method creates a FileInputStream and than wraps it into a
  * BufferedInputStream, and then read the data from it.
 */
-displayer.displayPdf(new File("path/to/your/file.pdf"));
+displayer.loadPDF(new File("path/to/your/file.pdf"));
 ```
 
 You can also load the pdf from a java.net.URL object:
@@ -43,13 +67,13 @@ You can also load the pdf from a java.net.URL object:
  * This method calls the URL.openStream() function to get the InputStream then wraps it into a
  * BufferedInputStream, and then read the data from it.
 */
-displayer.displayPdf(new URL("https://www.tutorialspoint.com/jdbc/jdbc_tutorial.pdf"));
+displayer.loadPDF(new URL("https://www.tutorialspoint.com/jdbc/jdbc_tutorial.pdf"));
 ```
 
 Or you can read the data from any kind of InputStream:
 ```java
 InputStream inputStream = getAnInputStream(); //just for representation
-displayer.displayPdf(inputStream);
+displayer.loadPDF(inputStream);
 ```
 
 You can use the constructors as well:
