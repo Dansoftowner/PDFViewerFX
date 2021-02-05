@@ -1,8 +1,11 @@
 package com.dansoftware.pdfdisplayer;
 
 import javafx.application.Platform;
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.concurrent.Task;
 import javafx.concurrent.Worker;
 import javafx.scene.Parent;
 import javafx.scene.web.WebEngine;
@@ -12,85 +15,129 @@ import netscape.javascript.JSObject;
 import java.io.*;
 import java.net.URL;
 import java.util.Base64;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.function.Consumer;
 
 public class PDFDisplayer {
 
+    private static final ExecutorService THREAD_POOL = Executors.newCachedThreadPool(runnable -> {
+        Thread t = new Thread(runnable);
+        t.setDaemon(true);
+        return t;
+    });
+
+    private final ObjectProperty<Consumer<Task<String>>> onLoaderTaskPresent =
+            new SimpleObjectProperty<>();
+
     private boolean pdfJsLoaded;
 
-    private ProcessListener processListener;
-
-    private WebView nodeValue;
+    private WebView webView;
     private String loadScript;
     private String toExecuteWhenPDFJSLoaded = "";
-
-
 
     public PDFDisplayer() {
     }
 
     public PDFDisplayer(File file) throws IOException {
-        displayPdf(file);
+        loadPDF(file);
     }
 
     public PDFDisplayer(URL url) throws IOException {
-        displayPdf(url);
+        loadPDF(url);
     }
 
     public PDFDisplayer(InputStream inputStream) throws IOException {
-        displayPdf(inputStream);
+        loadPDF(inputStream);
     }
 
-
+    @Deprecated
     public void displayPdf(File file) throws IOException {
-        displayPdf(new BufferedInputStream(new FileInputStream(file)));
+        loadPDF(file);
     }
 
+    @Deprecated
     public void displayPdf(URL url) throws IOException {
-        displayPdf(new BufferedInputStream(url.openConnection().getInputStream()));
+        loadPDF(url);
     }
 
-    public void displayPdf(InputStream inputStream) throws IOException {
+    public void loadPDF(File file) throws IOException {
+        loadPDF(new BufferedInputStream(new FileInputStream(file)));
+    }
 
+    public void loadPDF(URL url) throws IOException {
+        loadPDF(new BufferedInputStream(url.openConnection().getInputStream()));
+    }
+
+    public void loadPDF(InputStream inputStream) {
         if (inputStream == null)
             return;
 
-        try (ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
+        Task<String> task = buildLoadingTask(inputStream);
 
-            updateProcessListener(false);
+        final Consumer<Task<String>> onLoaderTaskPresent = this.onLoaderTaskPresent.get();
+        if (onLoaderTaskPresent != null) {
+            Platform.runLater(() -> onLoaderTaskPresent.accept(task));
+        }
+        THREAD_POOL.submit(task);
+    }
 
-            byte[] buffer = new byte[4096];
+    /**
+     * @deprecated Use {@link #loadPDF(InputStream)} instead
+     */
+    @Deprecated
+    public void displayPdf(InputStream inputStream) throws IOException {
+        loadPDF(inputStream);
+    }
 
-            int actualByteCount;
-            while (true) {
-                try {
-                    if ((actualByteCount = inputStream.read(buffer)) == -1) break;
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
+    private Task<String> buildLoadingTask(InputStream inputStream) {
+        final Task<String> task = new Task<String>() {
+            @Override
+            protected String call() throws Exception {
+                try (ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
+
+                    long contentSize = inputStream.available();
+                    long onePercent = contentSize / 100;
+
+                    int allReadBytesCount = 0;
+
+                    byte[] buf = new byte[4096];
+                    int bytesRead;
+                    while ((bytesRead = inputStream.read(buf)) >= 0) {
+                        allReadBytesCount += bytesRead;
+                        outputStream.write(buf, 0, bytesRead);
+
+                        if (onePercent > 0) {
+                            double percent = allReadBytesCount / (double) onePercent;
+                            updateProgress(percent, 100d);
+                        }
+
+                        if (this.isCancelled()) {
+                            return null;
+                        }
+                    }
+
+                    byte[] data = outputStream.toByteArray();
+                    String base64 = Base64.getEncoder().encodeToString(data);
+
+                    //JS Function declaration
+                    return "openFileFromBase64('" + base64 + "');";
+                } finally {
+                    inputStream.close();
                 }
-                outputStream.write(buffer, 0, actualByteCount);
             }
-
-            updateProcessListener(true);
-
-            byte[] data = outputStream.toByteArray();
-            String base64 = Base64.getEncoder().encodeToString(data);
-            // call JS function from Java code
-            String js = "openFileFromBase64('" + base64 + "');";
-
-            Platform.runLater(() -> {
+        };
+        task.valueProperty().addListener((observable, oldValue, js) -> {
+            if (js != null) {
                 try {
-                    nodeValue.getEngine().executeScript(js);
+                    webView.getEngine().executeScript(js);
                 } catch (Exception ex) {
                     if (!pdfJsLoaded) loadScript = js;
                 }
-            });
-
-        } finally {
-            inputStream.close();
-        }
-
+            }
+        });
+        return task;
     }
-
 
     @SuppressWarnings("all")
     public void setSecondaryToolbarToggleVisibility(boolean value) {
@@ -112,7 +159,7 @@ public class PDFDisplayer {
         }
 
         try {
-            nodeValue.getEngine().executeScript(js);
+            webView.getEngine().executeScript(js);
         } catch (Exception ex){
             if (!pdfJsLoaded) toExecuteWhenPDFJSLoaded += js;
         }
@@ -134,7 +181,7 @@ public class PDFDisplayer {
         }
 
         try {
-            nodeValue.getEngine().executeScript(css);
+            webView.getEngine().executeScript(css);
         } catch (Exception ex) {
             if (!pdfJsLoaded) this.toExecuteWhenPDFJSLoaded += css;
         }
@@ -142,7 +189,7 @@ public class PDFDisplayer {
 
     public int getActualPageNumber(){
         try {
-            return (int) nodeValue.getEngine().executeScript("PDFViewerApplication.page;");
+            return (int) webView.getEngine().executeScript("PDFViewerApplication.page;");
         } catch (Exception e) {
             return 0;
         }
@@ -150,7 +197,7 @@ public class PDFDisplayer {
 
     public int getTotalPageCount(){
         try {
-            return (int) nodeValue.getEngine().executeScript("PDFViewerApplication.pagesCount;");
+            return (int) webView.getEngine().executeScript("PDFViewerApplication.pagesCount;");
         } catch (Exception e) {
             return 0;
         }
@@ -159,26 +206,18 @@ public class PDFDisplayer {
     public void navigateByPage(int pageNum) {
         String jsCommand = "goToPage(" + pageNum + ");";
         try {
-            nodeValue.getEngine().executeScript(jsCommand);
+            webView.getEngine().executeScript(jsCommand);
         } catch (Exception ex) {
             if (!pdfJsLoaded) toExecuteWhenPDFJSLoaded += jsCommand;
         }
     }
 
-    public void setProcessListener(ProcessListener listener) {
-        this.processListener = listener;
-    }
-
     public void executeScript(String js) {
         try {
-            this.nodeValue.getEngine().executeScript(js);
+            this.webView.getEngine().executeScript(js);
         } catch (Exception ex) {
             if (!pdfJsLoaded) toExecuteWhenPDFJSLoaded += String.format("%s;", js);
         }
-    }
-
-    private void updateProcessListener(boolean val) {
-        if (processListener != null && pdfJsLoaded) processListener.listen(val);
     }
 
     private WebView createWebView() {
@@ -191,8 +230,6 @@ public class PDFDisplayer {
 
         engine.setJavaScriptEnabled(true);
         engine.load(url);
-
-        if (processListener != null) processListener.listen(false);
 
 
         engine.getLoadWorker()
@@ -207,7 +244,7 @@ public class PDFDisplayer {
 
                                 if (newValue == Worker.State.SUCCEEDED) {
                                     try {
-                                        if (processListener != null) processListener.listen(pdfJsLoaded = true);
+                                       pdfJsLoaded = true;
 
                                         if (loadScript != null)
                                             engine.executeScript(loadScript);
@@ -221,17 +258,25 @@ public class PDFDisplayer {
                                 }
                             }
                         });
-
         return webView;
-
     }
 
-
-
     public Parent toNode() {
-        if (nodeValue == null)
-            return nodeValue = createWebView();
+        if (webView == null)
+            return webView = createWebView();
         else
-            return nodeValue;
+            return webView;
+    }
+
+    public Consumer<Task<String>> getOnLoaderTaskPresent() {
+        return onLoaderTaskPresent.get();
+    }
+
+    public ObjectProperty<Consumer<Task<String>>> onLoaderTaskPresentProperty() {
+        return onLoaderTaskPresent;
+    }
+
+    public void setOnLoaderTaskPresent(Consumer<Task<String>> onLoaderTaskPresent) {
+        this.onLoaderTaskPresent.set(onLoaderTaskPresent);
     }
 }
