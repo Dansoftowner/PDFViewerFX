@@ -1,4 +1,10 @@
 # PDFViewerFX
+
+[![](https://jitpack.io/v/Dansoftowner/PDFViewerFX.svg)](https://jitpack.io/#Dansoftowner/PDFViewerFX)
+[![GitHub last commit](https://img.shields.io/github/last-commit/Dansoftowner/PDFViewerFX)](https://github.com/Dansoftowner/PDFViewerFX/commits/master)
+[![GitHub issues](https://img.shields.io/github/issues/Dansoftowner/PDFViewerFX)](https://github.com/Dansoftowner/PDFViewerFX/issues)
+[![GitHub](https://img.shields.io/github/license/Dansoftowner/PDFViewerFX)](LICENSE)
+
 #### A library for displaying/viewing pdf documents inside your javaFX application
 This library is actually a javaFX wrapper for Mozilla's [PDF.js](https://github.com/mozilla/pdf.js/) javascript library, but with this library you don't have to
 deal with any javascript code, so you can just use a java object to view pdf documents in javaFX. 
@@ -85,6 +91,11 @@ PDFDisplayer(InputStream) //reads the data from the InputStream
 
 ## More operations, tutorials
 If you want to deal with some other useful functions from this library, just go to the [wiki](https://github.com/Dansoftowner/PDFViewerFX/wiki) page! 
+
+## Projects using `PDFViewerFX`
+If this library is used by your project, let me know in the `Discussions` and I will mention that in this section.
+
+* [Document Archiver](https://github.com/Document-Archiver/com.sophisticatedapps.archiving.document-archiver) - Archive all your documents in a consistent way, which enables you to retrieve them later fast and easy.
 
 ## Screenshots
 
