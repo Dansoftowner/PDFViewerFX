@@ -1,11 +1,11 @@
 import com.dansoftware.pdfdisplayer.PDFDisplayer;
 import javafx.application.Application;
-import javafx.application.Platform;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
+import javafx.scene.text.Text;
 import javafx.stage.Stage;
 
 import java.io.IOException;
@@ -30,7 +30,13 @@ public class Demo extends Application {
         Button btn = new Button("Load");
         btn.setOnAction(e -> loadPDF(displayer));
 
-        primaryStage.setScene(new Scene(new VBox(btn, displayer.toNode())));
+        Text javaInfo = new Text(
+                String.format("Java version: %s, JavaFX version: %s",
+                        System.getProperty("java.version"),
+                        System.getProperty("javafx.version"))
+        );
+
+        primaryStage.setScene(new Scene(new VBox(btn, displayer.toNode(), javaInfo)));
         primaryStage.show();
 
         loadPDF(displayer);
@@ -38,7 +44,7 @@ public class Demo extends Application {
         displayer.setSecondaryToolbarToggleVisibility(true);
         displayer.toNode().getStylesheets().add("style.css");
 
-        displayer.executeScript("document.getElementById('secondaryToolbarToggle').style.backgroundColor = 'blue';");
+        //displayer.executeScript("document.getElementById('secondaryToolbarToggle').style.backgroundColor = 'blue';");
 
         ///JSLogListener.setOutputStream(System.err);
     }
