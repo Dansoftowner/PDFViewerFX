@@ -28,7 +28,7 @@ Releases are available through [JitPack](https://jitpack.io/#Dansoftowner/PDFVie
 <dependency>
     <groupId>com.github.Dansoftowner</groupId>
     <artifactId>PDFViewerFX</artifactId>
-    <version>0.7</version>
+    <version>0.8</version>
 </dependency>
 ```  
 
@@ -43,7 +43,7 @@ repositories {
 
 ```groovy
 dependencies {
-    implementation 'com.github.Dansoftowner:PDFViewerFX:0.7'
+    implementation 'com.github.Dansoftowner:PDFViewerFX:0.8'
 }
 ```
 
