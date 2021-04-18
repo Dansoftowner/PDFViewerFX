@@ -36,23 +36,45 @@ public class PDFDisplayer {
 
     private boolean pdfJsLoaded;
 
+    private final PdfJSVersion version;
+
     private WebView webView;
     private String loadScript;
     private String toExecuteWhenPDFJSLoaded = "";
 
-    public PDFDisplayer() {
+    public PDFDisplayer(PdfJSVersion version) {
+        this.version = version;
     }
 
-    public PDFDisplayer(File file) throws IOException {
+    public PDFDisplayer() {
+        this(PdfJSVersion.latest());
+    }
+
+    public PDFDisplayer(PdfJSVersion version, File file) throws IOException {
+        this(version);
         loadPDF(file);
     }
 
-    public PDFDisplayer(URL url) throws IOException {
+    public PDFDisplayer(File file) throws IOException {
+        this(PdfJSVersion.latest(), file);
+    }
+
+    public PDFDisplayer(PdfJSVersion version, URL url) throws IOException {
+        this(version);
         loadPDF(url);
     }
 
-    public PDFDisplayer(InputStream inputStream) throws IOException {
+    public PDFDisplayer(URL url) throws IOException {
+        this(PdfJSVersion.latest(), url);
+    }
+
+    public PDFDisplayer(PdfJSVersion version, InputStream inputStream) throws IOException {
+        this(version);
         loadPDF(inputStream);
+    }
+
+    public PDFDisplayer(InputStream inputStream) throws IOException {
+        this(PdfJSVersion.latest(), inputStream);
     }
 
     @Deprecated
@@ -229,7 +251,7 @@ public class PDFDisplayer {
         webView.setContextMenuEnabled(false);
 
         WebEngine engine = webView.getEngine();
-        String url = getClass().getResource("/pdfjs/web/viewer.html").toExternalForm();
+        String url = getClass().getResource(version.getHome()).toExternalForm();
 
         engine.setJavaScriptEnabled(true);
         engine.load(url);

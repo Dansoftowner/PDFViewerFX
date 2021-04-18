@@ -1,4 +1,5 @@
 import com.dansoftware.pdfdisplayer.PDFDisplayer;
+import com.dansoftware.pdfdisplayer.PdfJSVersion;
 import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
@@ -14,7 +15,7 @@ import java.net.URL;
 public class Demo extends Application {
     @Override
     public void start(Stage primaryStage) throws Exception {
-        PDFDisplayer displayer = new PDFDisplayer();
+        PDFDisplayer displayer = new PDFDisplayer(PdfJSVersion._2_2_228);
 
         Stage alertStage = new Stage();
         alertStage.setScene(new Scene(new StackPane(new Label("Processing"))));
@@ -38,8 +39,6 @@ public class Demo extends Application {
 
         primaryStage.setScene(new Scene(new VBox(btn, displayer.toNode(), javaInfo)));
         primaryStage.show();
-
-        loadPDF(displayer);
 
         displayer.setSecondaryToolbarToggleVisibility(true);
         displayer.toNode().getStylesheets().add("style.css");
